@@ -1,0 +1,6 @@
+samconfig.toml
+.aws-sam/
+secrets.txt
+env.json
+config/
+.vscode/

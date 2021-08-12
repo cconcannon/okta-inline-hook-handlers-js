@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS SAM template with a simple API definition
+Globals:
+  Function:
+    Timeout: 30
+Resources:
+  OktaInlineHookHandlersApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Auth:
+        ApiKeyRequired: true
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          Description: Inline Hook Handler API Usage Plan
+          Quota:
+            Limit: 10000
+            Period: MONTH
+          Throttle:
+            BurstLimit: 100
+            RateLimit: 50
+      StageName: prod
+  PasswordImportInlineHookHandlerFunction: # Adds the /password-import endpoint to the OktaInlineHookHandlersApi
+    Type: AWS::Serverless::Function
+    Properties:
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /password-import
+            Method: POST
+            Auth:
+              ApiKeyRequired: true
+            RestApiId:
+              Ref: OktaInlineHookHandlersApi
+      Runtime: nodejs14.x
+      Handler: passwordImportInlineHookHandler.handler
+  RegistrationInlineHookHandlerFunction: # Adds the /registration endpoint to the OktaInlineHookHandlersApi
+    Type: AWS::Serverless::Function
+    Properties:
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /registration
+            Method: POST
+            Auth:
+              ApiKeyRequired: true
+            RestApiId:
+              Ref: OktaInlineHookHandlersApi
+      Runtime: nodejs14.x
+      Handler: registrationInlineHookHandler.handler
+  SamlAssertionInlineHookHandlerFunction: # Adds the /saml-assertion endpoint to the OktaInlineHookHandlersApi
+    Type: AWS::Serverless::Function
+    Properties:
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /saml-assertion
+            Method: POST
+            Auth:
+              ApiKeyRequired: true
+            RestApiId:
+              Ref: OktaInlineHookHandlersApi
+      Runtime: nodejs14.x
+      Handler: samlAssertionInlineHookHandler.handler
+  UserImportInlineHookHandlerFunction: # Adds the /user-import endpoint to the OktaInlineHookHandlersApi
+    Type: AWS::Serverless::Function
+    Properties:
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /user-import
+            Method: POST
+            Auth:
+              ApiKeyRequired: true
+            RestApiId:
+              Ref: OktaInlineHookHandlersApi
+      Runtime: nodejs14.x
+      Handler: userImportInlineHookHandler.handler
+  TokenInlineHookHandlerFunction: # Adds the /token endpoint to the OktaInlineHookHandlersApi
+    Type: AWS::Serverless::Function
+    Properties:
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /token
+            Method: POST
+            Auth:
+              ApiKeyRequired: true
+            RestApiId:
+              Ref: OktaInlineHookHandlersApi
+      Runtime: nodejs14.x
+      Handler: tokenInlineHookHandler.handler
+Outputs:
+  EndpointFormat:
+    Description: "Construct the endpoint according to the format below, with the appropriate values"
+    Value: "https://{id}.execute-api.{region}.amazonaws.com/{stage}/{path}"
+  EndpointExample:
+    Description: "An example endpoint with id=abc123, region=us-west-1, stage=prod, path=/"
+    Value: "https://abc123.execute-api.us-west-1.amazonaws.com/prod/"
+  NewApiId:
+    Description: "The API ID for creating the invocation endpoint(s)"
+    Value: !Ref OktaInlineHookHandlersApi
